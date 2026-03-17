@@ -73,7 +73,53 @@ class Trasher extends Dog {
     }
 
     getDescriptions() {
-        return [getCreatureDescription(this), "Если Громилу атакуют, то он получает на 1 меньше урона.", ...super.getDescriptions()];
+        return [getCreatureDescription(this), ...super.getDescriptions(), "Если Громилу атакуют, то он получает на 1 меньше урона."];
+    }
+}
+
+class Lad extends Dog {
+    constructor(name = 'Браток', power = 2) {
+        super(name, power);
+    }
+
+    static getInGameCount() {
+        return this.inGameCount || 0;
+    }
+
+    static setInGameCount(value) {
+        this.inGameCount = value;
+    }
+
+    doAfterComingIntoPlay(gameContext, continuation) {
+        Lad.setInGameCount(Lad.getInGameCount() + 1);
+        continuation();
+    }
+
+    doBeforeRemoving(continuation) {
+        Lad.setInGameCount(Lad.getInGameCount() - 1);
+        continuation();
+    }
+
+    static getBonus() {
+        const ladsCount = this.getInGameCount();
+        return ladsCount * (ladsCount + 1) / 2
+    }
+
+    modifyDealedDamageToCreature(value, toCard, gameContext, continuation) {
+        continuation(value + Lad.getBonus());
+    };
+
+    modifyTakenDamage(value, toCard, gameContext, continuation) {
+        const damage = value - Lad.getBonus();
+        continuation(damage > 0 ? damage : 0);
+    };
+
+    getDescriptions() {
+        const descriptions = [getCreatureDescription(this), ...super.getDescriptions()];
+        if (Lad.prototype.hasOwnProperty('modifyDealedDamageToCreature')) {
+            descriptions.push("Чем их больше, тем они сильнее");
+        }
+        return descriptions;
     }
 }
 
@@ -86,14 +132,24 @@ class Trasher extends Dog {
 //     new Dog(),
 // ];
 
+// const seriffStartDeck = [
+//     new Duck(),
+//     new Duck(),
+//     new Duck(),
+//     new Duck(),
+// ];
+// const banditStartDeck = [
+//     new Trasher(),
+// ];
+
 const seriffStartDeck = [
-    new Duck(),
     new Duck(),
     new Duck(),
     new Duck(),
 ];
 const banditStartDeck = [
-    new Trasher(),
+    new Lad(),
+    new Lad(),
 ];
 
 
