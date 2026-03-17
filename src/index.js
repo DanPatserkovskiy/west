@@ -2,6 +2,7 @@ import Card from './Card.js';
 import Game from './Game.js';
 import TaskQueue from './TaskQueue.js';
 import SpeedRate from './SpeedRate.js';
+import card from "./Card.js";
 
 // Отвечает является ли карта уткой.
 function isDuck(card) {
@@ -27,10 +28,18 @@ function getCreatureDescription(card) {
     return 'Существо';
 }
 
+class Creature extends Card {
+    constructor(name, power) {
+        super(name, power);
+    }
 
+    getDescriptions() {
+        return [getCreatureDescription(this), ...super.getDescriptions()];
+    }
+}
 
 // Основа для утки.
-class Duck extends Card {
+class Duck extends Creature {
     constructor(name = 'Утка', power = 0) {
         super(name, power);
     }
@@ -46,16 +55,25 @@ class Duck extends Card {
 
 
 // Основа для собаки.
-class Dog extends Card {
+class Dog extends Creature {
     constructor(name = 'Собака', power = 0) {
         super(name, power);
     }
 }
 
+// const seriffStartDeck = [
+//     new Duck(),
+//     new Duck(),
+//     new Duck(),
+// ];
+// const banditStartDeck = [
+//     new Dog(),
+// ];
+
 
 // Колода Шерифа, нижнего игрока.
 const seriffStartDeck = [
-    new Duck(),
+    new Duck('Мирный житель', 2),
     new Duck('Мирный житель', 2),
     new Duck('Мирный житель', 2),
 ];
