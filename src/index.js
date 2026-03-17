@@ -148,6 +148,62 @@ class Lad extends Dog {
     }
 }
 
+class Rogue extends Creature {
+    constructor(name = 'Изгой', power = 2) {
+        super(name, power);
+    }
+
+    static get STEALABLE_ABILITIES() {
+        return ['modifyDealedDamageToCreature', 'modifyDealedDamageToPlayer', 'modifyTakenDamage'];
+    }
+
+    doBeforeAttack(gameContext, continuation) {
+        const { currentPlayer, oppositePlayer, updateView } = gameContext;
+
+        const targetCard = oppositePlayer.table[0];
+
+        if (targetCard && !(targetCard instanceof Rogue)) {
+            this.stealAbilities(targetCard);
+            updateView();
+        }
+
+        continuation();
+    }
+
+    stealAbilities(card) {
+        const cardProto = Object.getPrototypeOf(card);
+        const rogueProto = Object.getPrototypeOf(this);
+
+        if (cardProto === rogueProto) {
+            return;
+        }
+
+        for (const abilityName of Rogue.STEALABLE_ABILITIES) {
+            if (cardProto.hasOwnProperty(abilityName)) {
+                const stolenAbility = cardProto[abilityName];
+
+                if (!this.hasOwnProperty(abilityName)) {
+                    this[abilityName] = stolenAbility;
+                }
+
+                delete cardProto[abilityName];
+            }
+        }
+    }
+}
+
+const seriffStartDeck = [
+    new Duck(),
+    new Rogue(),
+    new Duck(),
+    new Duck(),
+];
+const banditStartDeck = [
+    new Lad(),
+    new Lad(),
+    new Lad(),
+];
+
 /*const seriffStartDeck = [
     new Duck(),
     new Duck(),
@@ -179,15 +235,15 @@ const banditStartDeck = [
 //     new Trasher(),
 // ];
 
-const seriffStartDeck = [
-    new Duck(),
-    new Duck(),
-    new Duck(),
-];
-const banditStartDeck = [
-    new Lad(),
-    new Lad(),
-];
+// const seriffStartDeck = [
+//     new Duck(),
+//     new Duck(),
+//     new Duck(),
+// ];
+// const banditStartDeck = [
+//     new Lad(),
+//     new Lad(),
+// ];
 
 
 // Колода Шерифа, нижнего игрока.
