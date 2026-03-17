@@ -31,10 +31,15 @@ function getCreatureDescription(card) {
 class Creature extends Card {
     constructor(name, power) {
         super(name, power);
+        this._currentPower = power;
     }
 
-    getDescriptions() {
-        return [getCreatureDescription(this), ...super.getDescriptions()];
+    get currentPower() {
+        return this._currentPower;
+    }
+
+    set currentPower(value) {
+        this._currentPower = Math.min(value, this.maxPower);
     }
 }
 
@@ -77,6 +82,38 @@ class Gatling extends Creature {
                 this.dealDamageToCreature(2, oppositeCard, gameContext, onDone);
             });
         }
+
+        taskQueue.continueWith(continuation);
+    }
+}
+
+class Brewer extends Duck {
+    constructor(name = 'Пивовар', power = 2) {
+        super(name, power);
+    }
+
+    attack(gameContext, continuation) {
+        const taskQueue = new TaskQueue();
+        const {currentPlayer, oppositePlayer} = gameContext;
+        const allCards = currentPlayer.table.concat(oppositePlayer.table);
+
+        for (let i = 0; i < allCards.length; i++) {
+            const card = allCards[i];
+            if (!card) continue;
+            taskQueue.push(onDone => {
+                if (card.isDuck) {
+                    card.maxPower += 1;
+                    card.currentPower += 2;
+                    this.view.signalHeal(card, onDone);
+                    card.updateView();
+                } else {
+                    onDone();
+                }
+            });
+        }
+        taskQueue.push(onDone => {
+            super.attack(gameContext, onDone);
+        });
 
         taskQueue.continueWith(continuation);
     }
@@ -148,6 +185,17 @@ class Lad extends Dog {
     }
 }
 
+const seriffStartDeck = [
+    new Duck(),
+    new Brewer(),
+];
+const banditStartDeck = [
+    new Dog(),
+    new Dog(),
+    new Dog(),
+    new Dog(),
+];
+
 /*const seriffStartDeck = [
     new Duck(),
     new Duck(),
@@ -179,7 +227,7 @@ const banditStartDeck = [
 //     new Trasher(),
 // ];
 
-const seriffStartDeck = [
+/*const seriffStartDeck = [
     new Duck(),
     new Duck(),
     new Duck(),
@@ -187,7 +235,7 @@ const seriffStartDeck = [
 const banditStartDeck = [
     new Lad(),
     new Lad(),
-];
+];*/
 
 
 // Колода Шерифа, нижнего игрока.
