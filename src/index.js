@@ -106,12 +106,16 @@ class Lad extends Dog {
     }
 
     modifyDealedDamageToCreature(value, toCard, gameContext, continuation) {
-        continuation(value + Lad.getBonus());
+        this.view.signalAbility(() => {
+            continuation(value + Lad.getBonus());
+        });
     };
 
     modifyTakenDamage(value, toCard, gameContext, continuation) {
         const damage = value - Lad.getBonus();
-        continuation(damage > 0 ? damage : 0);
+        this.view.signalAbility(() => {
+            continuation(damage > 0 ? damage : 0);
+        });
     };
 
     getDescriptions() {
